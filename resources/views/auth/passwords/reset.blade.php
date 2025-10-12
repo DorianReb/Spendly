@@ -1,65 +1,125 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restablecer contraseña – Spendly</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root{
+            --morado:#6C63FF; --amarillo:#FFD460; --beige:#FAF3DD; --gris:#2E2E2E;
+            --bg:var(--beige); --text:var(--gris); --card:#fff; --muted:#555;
+            --fs-0: clamp(1rem, .9rem + .4vw, 1.125rem);
+            --fs-1: clamp(1.25rem, 1.05rem + .9vw, 1.6rem);
+            --pad: clamp(1rem, .8rem + 1.2vw, 2rem);
+            --radius: 1.25rem;
+        }
+        body{ background:var(--bg); color:var(--text); font-family:system-ui, sans-serif; }
+        .card-soft{ background:var(--card); border:1px solid #eee; border-radius: var(--radius); }
+        .btn-primary{ background:var(--morado); border:none; font-weight:700; }
+        .btn-primary:hover{ background:#584efc; }
+        .input-group-text{ background: var(--card); border-right:0; color: var(--muted); }
+        .input-group .form-control{ border-left:0; }
+    </style>
+</head>
+<body>
 
-@section('content')
-<div class="container">
+<div class="container py-4">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Reset Password') }}</div>
-
-                <div class="card-body">
-                    <form method="POST" action="{{ route('password.update') }}">
-                        @csrf
-
-                        <input type="hidden" name="token" value="{{ $token }}">
-
-                        <div class="row mb-3">
-                            <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Email Address') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ $email ?? old('email') }}" required autocomplete="email" autofocus>
-
-                                @error('email')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Password') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="new-password">
-
-                                @error('password')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <label for="password-confirm" class="col-md-4 col-form-label text-md-end">{{ __('Confirm Password') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required autocomplete="new-password">
-                            </div>
-                        </div>
-
-                        <div class="row mb-0">
-                            <div class="col-md-6 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
-                                    {{ __('Reset Password') }}
-                                </button>
-                            </div>
-                        </div>
-                    </form>
+        <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+            <div class="card-soft shadow-sm p-3 p-md-4">
+                <div class="mb-3 text-center">
+                    <h1 class="h3 fw-bold mb-1">Restablecer contraseña</h1>
+                    <p class="m-0" style="color:var(--muted)">Elige una nueva contraseña segura para tu cuenta</p>
                 </div>
+
+                <form method="POST" action="{{ route('password.update') }}" novalidate>
+                    @csrf
+                    <input type="hidden" name="token" value="{{ $token }}">
+
+                    {{-- Email --}}
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Correo electrónico</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+                            <input id="email" type="email"
+                                   class="form-control @error('email') is-invalid @enderror"
+                                   name="email" value="{{ $email ?? old('email') }}" required autocomplete="email" autofocus
+                                   placeholder="tucorreo@ejemplo.com">
+                        </div>
+                        @error('email')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    {{-- Nueva contraseña --}}
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Nueva contraseña</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                            <input id="password" type="password"
+                                   class="form-control @error('password') is-invalid @enderror"
+                                   name="password" required autocomplete="new-password"
+                                   placeholder="Mínimo 8 caracteres">
+                            <button class="btn btn-outline-secondary" type="button" id="togglePass" aria-label="Mostrar u ocultar contraseña">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                        @error('password')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    {{-- Confirmación --}}
+                    <div class="mb-4">
+                        <label for="password-confirm" class="form-label">Confirmar contraseña</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                            <input id="password-confirm" type="password" class="form-control"
+                                   name="password_confirmation" required autocomplete="new-password"
+                                   placeholder="Repite tu nueva contraseña">
+                            <button class="btn btn-outline-secondary" type="button" id="togglePass2" aria-label="Mostrar u ocultar confirmación">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- CTA --}}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fa-solid fa-rotate me-1"></i> Restablecer contraseña
+                        </button>
+                        <a class="btn btn-outline-dark" href="{{ url('/login') }}">
+                            <i class="fa-solid fa-arrow-right-to-bracket me-1"></i> Volver al inicio de sesión
+                        </a>
+                    </div>
+                </form>
             </div>
+
+            <p class="text-center mt-3" style="color:var(--muted)">
+                © {{ date('Y') }} Spendly — Seguridad y equilibrio
+            </p>
         </div>
     </div>
 </div>
-@endsection
+
+<script>
+    function wireToggle(btnId, inputId){
+        const btn = document.getElementById(btnId);
+        const input = document.getElementById(inputId);
+        if(!btn || !input) return;
+        btn.addEventListener('click', ()=>{
+            const icon = btn.querySelector('i');
+            const show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
+    }
+    wireToggle('togglePass','password');
+    wireToggle('togglePass2','password-confirm');
+</script>
+
+</body>
+</html>

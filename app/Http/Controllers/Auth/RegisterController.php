@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class RegisterController extends Controller
 {
@@ -48,10 +50,23 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
+        // Normalización ligera (limpia XSS simples y espacios)
+        $data['nombre'] = isset($data['nombre']) ? trim(strip_tags((string)$data['nombre'])) : null;
+        $data['email']  = isset($data['email'])  ? mb_strtolower(trim((string)$data['email'])) : null;
+
+        // Guardamos los datos normalizados para que create() reciba lo mismo
+        request()->merge($data);
+
         return Validator::make($data, [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'nombre' => ['required','string','min:2','max:120'],
+            'email'  => ['required','string','email:rfc,dns','max:190', Rule::unique('usuarios','email')],
+            'password' => [
+                'required','confirmed',
+                Password::min(8)->letters()->numbers()->mixedCase()->uncompromised()
+            ],
+        ], [
+            'email.unique' => 'Este correo ya está registrado.',
+            'password.confirmed' => 'La confirmación de contraseña no coincide.',
         ]);
     }
 
@@ -64,9 +79,9 @@ class RegisterController extends Controller
     protected function create(array $data)
     {
         return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+            'nombre'        => trim($data['nombre']),
+            'email'         => mb_strtolower($data['email']),
+            'password_hash' => Hash::make($data['password']),
         ]);
     }
 }
