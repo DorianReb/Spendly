@@ -1,11 +1,7 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restablecer contraseña – Spendly</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+@extends('layouts.app')
+@section('title','Restablecer contraseña')
+
+@section('content')
     <style>
         :root{
             --morado:#6C63FF; --amarillo:#FFD460; --beige:#FAF3DD; --gris:#2E2E2E;
@@ -15,111 +11,109 @@
             --pad: clamp(1rem, .8rem + 1.2vw, 2rem);
             --radius: 1.25rem;
         }
-        body{ background:var(--bg); color:var(--text); font-family:system-ui, sans-serif; }
+        body{ background:var(--bg); color:var(--text); }
         .card-soft{ background:var(--card); border:1px solid #eee; border-radius: var(--radius); }
         .btn-primary{ background:var(--morado); border:none; font-weight:700; }
         .btn-primary:hover{ background:#584efc; }
+        .accent{ color: var(--morado); }
         .input-group-text{ background: var(--card); border-right:0; color: var(--muted); }
         .input-group .form-control{ border-left:0; }
     </style>
-</head>
-<body>
 
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-12 col-md-10 col-lg-8 col-xl-6">
-            <div class="card-soft shadow-sm p-3 p-md-4">
-                <div class="mb-3 text-center">
-                    <h1 class="h3 fw-bold mb-1">Restablecer contraseña</h1>
-                    <p class="m-0" style="color:var(--muted)">Elige una nueva contraseña segura para tu cuenta</p>
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+                <div class="card-soft shadow-sm p-3 p-md-4">
+                    <div class="mb-3 text-center">
+                        <h1 class="h3 fw-bold mb-1">Restablecer contraseña</h1>
+                        <p class="m-0" style="color:var(--muted)">Elige una nueva contraseña segura para tu cuenta</p>
+                    </div>
+
+                    <form method="POST" action="{{ route('password.update') }}" novalidate>
+                        @csrf
+                        <input type="hidden" name="token" value="{{ $token }}">
+
+                        {{-- EMAIL --}}
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Correo electrónico</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+                                <input id="email" type="email"
+                                       class="form-control @error('email') is-invalid @enderror"
+                                       name="email" value="{{ $email ?? old('email') }}" required autocomplete="email" autofocus
+                                       placeholder="tucorreo@ejemplo.com">
+                            </div>
+                            @error('email')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        {{-- NUEVA CONTRASEÑA --}}
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Nueva contraseña</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                                <input id="password" type="password"
+                                       class="form-control @error('password') is-invalid @enderror"
+                                       name="password" required autocomplete="new-password"
+                                       placeholder="Mínimo 8 caracteres">
+                                <button class="btn btn-outline-secondary" type="button" id="togglePass" aria-label="Mostrar u ocultar contraseña">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </div>
+                            @error('password')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        {{-- CONFIRMACIÓN --}}
+                        <div class="mb-4">
+                            <label for="password-confirm" class="form-label">Confirmar contraseña</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                                <input id="password-confirm" type="password" class="form-control"
+                                       name="password_confirmation" required autocomplete="new-password"
+                                       placeholder="Repite tu nueva contraseña">
+                                <button class="btn btn-outline-secondary" type="button" id="togglePass2" aria-label="Mostrar u ocultar confirmación">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- BOTONES --}}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fa-solid fa-rotate me-1"></i> Restablecer contraseña
+                            </button>
+                            <a class="btn btn-outline-dark" href="{{ url('/login') }}">
+                                <i class="fa-solid fa-arrow-right-to-bracket me-1"></i> Volver al inicio de sesión
+                            </a>
+                        </div>
+                    </form>
                 </div>
 
-                <form method="POST" action="{{ route('password.update') }}" novalidate>
-                    @csrf
-                    <input type="hidden" name="token" value="{{ $token }}">
-
-                    {{-- Email --}}
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Correo electrónico</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
-                            <input id="email" type="email"
-                                   class="form-control @error('email') is-invalid @enderror"
-                                   name="email" value="{{ $email ?? old('email') }}" required autocomplete="email" autofocus
-                                   placeholder="tucorreo@ejemplo.com">
-                        </div>
-                        @error('email')
-                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    {{-- Nueva contraseña --}}
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Nueva contraseña</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
-                            <input id="password" type="password"
-                                   class="form-control @error('password') is-invalid @enderror"
-                                   name="password" required autocomplete="new-password"
-                                   placeholder="Mínimo 8 caracteres">
-                            <button class="btn btn-outline-secondary" type="button" id="togglePass" aria-label="Mostrar u ocultar contraseña">
-                                <i class="fa-solid fa-eye"></i>
-                            </button>
-                        </div>
-                        @error('password')
-                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    {{-- Confirmación --}}
-                    <div class="mb-4">
-                        <label for="password-confirm" class="form-label">Confirmar contraseña</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
-                            <input id="password-confirm" type="password" class="form-control"
-                                   name="password_confirmation" required autocomplete="new-password"
-                                   placeholder="Repite tu nueva contraseña">
-                            <button class="btn btn-outline-secondary" type="button" id="togglePass2" aria-label="Mostrar u ocultar confirmación">
-                                <i class="fa-solid fa-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    {{-- CTA --}}
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="fa-solid fa-rotate me-1"></i> Restablecer contraseña
-                        </button>
-                        <a class="btn btn-outline-dark" href="{{ url('/login') }}">
-                            <i class="fa-solid fa-arrow-right-to-bracket me-1"></i> Volver al inicio de sesión
-                        </a>
-                    </div>
-                </form>
+                <p class="text-center mt-3" style="color:var(--muted)">
+                    © {{ date('Y') }} Spendly — Seguridad y equilibrio
+                </p>
             </div>
-
-            <p class="text-center mt-3" style="color:var(--muted)">
-                © {{ date('Y') }} Spendly — Seguridad y equilibrio
-            </p>
         </div>
     </div>
-</div>
 
-<script>
-    function wireToggle(btnId, inputId){
-        const btn = document.getElementById(btnId);
-        const input = document.getElementById(inputId);
-        if(!btn || !input) return;
-        btn.addEventListener('click', ()=>{
-            const icon = btn.querySelector('i');
-            const show = input.type === 'password';
-            input.type = show ? 'text' : 'password';
-            icon.classList.toggle('fa-eye');
-            icon.classList.toggle('fa-eye-slash');
-        });
-    }
-    wireToggle('togglePass','password');
-    wireToggle('togglePass2','password-confirm');
-</script>
-
-</body>
-</html>
+    {{-- JS mínimo: toggle de contraseñas --}}
+    <script>
+        function wireToggle(btnId, inputId){
+            const btn = document.getElementById(btnId);
+            const input = document.getElementById(inputId);
+            if(!btn || !input) return;
+            btn.addEventListener('click', ()=>{
+                const icon = btn.querySelector('i');
+                const show = input.type === 'password';
+                input.type = show ? 'text' : 'password';
+                icon.classList.toggle('fa-eye');
+                icon.classList.toggle('fa-eye-slash');
+            });
+        }
+        wireToggle('togglePass','password');
+        wireToggle('togglePass2','password-confirm');
+    </script>
+@endsection

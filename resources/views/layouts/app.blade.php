@@ -15,19 +15,39 @@
 
     <style>
         :root{
-            --morado:#6C63FF; --amarillo:#FFD460; --beige:#FAF3DD; --gris:#2E2E2E;
-            --bg:var(--beige); --text:var(--gris); --card:#fff; --muted:#666;
+            --morado:#6C63FF;
+            --amarillo:#FFCE45; /* más cálido, menos saturado */
+            --beige:#FAF3DD;
+            --gris:#2E2E2E;
+
+            --bg:var(--beige);
+            --text:var(--gris);
+            --card:#ffffff;
+            --muted:#666666;
             --divider: color-mix(in oklab, var(--text) 14%, transparent);
-            --radius:1rem; --shadow:0 10px 28px rgba(0,0,0,.08);
-            --w-sidebar: 220px;         /* 👈 más pequeño */
-            --pad-1: .75rem; --pad-2: 1rem;
-            --fs-0: clamp(.95rem,.9rem + .25vw,1.05rem);
-            --fs-1: clamp(1.1rem,1rem + .5vw,1.35rem);
+
+            --radius:1rem;
+            --shadow:0 10px 28px rgba(0,0,0,.08);
+            --w-sidebar:220px;
+            --pad-1:.75rem;
+            --pad-2:1rem;
+            --fs-0:clamp(.95rem,.9rem + .25vw,1.05rem);
+            --fs-1:clamp(1.1rem,1rem + .5vw,1.35rem);
         }
+
         html[data-theme="dark"]{
-            --bg:#151318; --text:#f5f5f7; --card:#1e1b25; --muted:#b8b8c2;
-            --divider: color-mix(in oklab, var(--text) 22%, transparent);
+            --bg:#141217;
+            --card:#1a171f;
+            --text:#e6e6eb;
+            --muted:#9d9daa;
+            --divider: color-mix(in oklab, var(--text) 25%, transparent);
+
+            /* Tonos adaptados al modo oscuro */
+            --morado:#7d72ff;  /* un poco más claro para resaltar sobre fondo oscuro */
+            --amarillo:#E9C66E; /* dorado suave, no chilla */
+            --beige:#242026;    /* beige neutro, mantiene coherencia */
         }
+
         html{ color-scheme: light dark }
         body{ margin:0; background:var(--bg); color:var(--text); font-family:'Nunito',system-ui,sans-serif; }
         .layout{ display:flex; min-height:100dvh; }
@@ -123,6 +143,23 @@
             .sidebar{ transform:none; }
             .sidebar-toggle{ display:none; }
             .content{ margin-left: var(--w-sidebar); }
+
+            /* ===== Toggle morado personalizado ===== */
+            .form-check-input:checked {
+                background-color: var(--morado) !important;
+                border-color: var(--morado) !important;
+                box-shadow: 0 0 0 0.25rem color-mix(in oklab, var(--morado) 35%, transparent) !important;
+            }
+
+            .form-check-input:focus {
+                border-color: var(--morado) !important;
+                box-shadow: 0 0 0 0.25rem color-mix(in oklab, var(--morado) 25%, transparent) !important;
+            }
+
+            .form-check-input {
+                cursor: pointer;
+            }
+
         }
     </style>
 </head>
@@ -150,21 +187,23 @@
         </div>
 
         <nav class="sb-nav" role="navigation">
-            <a href="{{ url('/dashboard') }}" class="sb-link {{ request()->is('dashboard') ? 'active' : '' }}">
+            <a href="{{ url('/home') }}" class="sb-link {{ request()->is('dashboard') ? 'active' : '' }}">
                 <i class="fa-solid fa-house"></i><span>Inicio</span>
             </a>
-            <a href="{{ url('/cuentas') }}" class="sb-link {{ request()->is('cuentas*') ? 'active' : '' }}">
+            {{--<a href="{{ url('/cuentas') }}" class="sb-link {{ request()->is('cuentas*') ? 'active' : '' }}">
                 <i class="fa-solid fa-wallet"></i><span>Cuentas</span>
             </a>
+            --}}
             <a href="{{ url('/graficos') }}" class="sb-link {{ request()->is('graficos*') ? 'active' : '' }}">
                 <i class="fa-solid fa-chart-line"></i><span>Gráficos</span>
             </a>
             <a href="{{ url('/categorias') }}" class="sb-link {{ request()->is('categorias*') ? 'active' : '' }}">
                 <i class="fa-solid fa-tags"></i><span>Categorías</span>
             </a>
-            <a href="{{ url('/pagos-habituales') }}" class="sb-link {{ request()->is('pagos-habituales*') ? 'active' : '' }}">
+            {{--<a href="{{ url('/pagos-habituales') }}" class="sb-link {{ request()->is('pagos-habituales*') ? 'active' : '' }}">
                 <i class="fa-solid fa-arrows-rotate"></i><span>Pagos habituales</span>
             </a>
+            */--}}
             <a href="{{ url('/recordatorios') }}" class="sb-link {{ request()->is('recordatorios*') ? 'active' : '' }}">
                 <i class="fa-solid fa-bell"></i><span>Recordatorios</span>
             </a>
@@ -186,12 +225,13 @@
                 </a>
             @endauth
 
-            <a href="{{ url('/compartir') }}" class="sb-link">
+            {{--/*<a href="{{ url('/compartir') }}" class="sb-link">
                 <i class="fa-solid fa-share-nodes"></i><span>Compartir con amigos</span>
             </a>
             <a href="{{ url('/valorar') }}" class="sb-link">
-                <i class="fa-regular fa-star"></i><span>Valorar la aplicación</span>
+                <i class="fa-regular fa-star"></i><span>Valorar la aplicación</span>*/
             </a>
+            --}}
             <a href="{{ url('/soporte') }}" class="sb-link {{ request()->is('soporte*') ? 'active' : '' }}">
                 <i class="fa-regular fa-envelope"></i><span>Contacto</span>
             </a>
