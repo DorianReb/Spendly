@@ -13,6 +13,38 @@
     {{-- Vite (Bootstrap + tu SCSS/JS) --}}
     @vite(['resources/sass/app.scss','resources/js/app.js'])
 
+    {{--SweetAlert2--}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    {{-- Flatpickr CSS --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    {{-- Flatpickr JS --}}
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+
+    {{-- SweetAlert para mensajes flash --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Listo',
+                text: @json(session('success')),
+                confirmButtonColor: '#6C63FF',
+            });
+            @endif
+
+            @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Ups…',
+                text: @json(session('error')),
+                confirmButtonColor: '#6C63FF',
+            });
+            @endif
+        });
+    </script>
+
     <style>
         :root{
             --morado:#6C63FF;
@@ -194,12 +226,13 @@
                 <i class="fa-solid fa-wallet"></i><span>Cuentas</span>
             </a>
             --}}
-            <a href="{{ url('/graficos') }}" class="sb-link {{ request()->is('graficos*') ? 'active' : '' }}">
+            <a href="{{ url('/grafico') }}" class="sb-link {{ request()->is('grafico*') ? 'active' : '' }}">
                 <i class="fa-solid fa-chart-line"></i><span>Gráficos</span>
             </a>
-            <a href="{{ url('/categorias') }}" class="sb-link {{ request()->is('categorias*') ? 'active' : '' }}">
+            <a href="{{ route('categorias.index') }}" class="sb-link {{ request()->is('categorias*') ? 'active' : '' }}">
                 <i class="fa-solid fa-tags"></i><span>Categorías</span>
             </a>
+
             {{--<a href="{{ url('/pagos-habituales') }}" class="sb-link {{ request()->is('pagos-habituales*') ? 'active' : '' }}">
                 <i class="fa-solid fa-arrows-rotate"></i><span>Pagos habituales</span>
             </a>
