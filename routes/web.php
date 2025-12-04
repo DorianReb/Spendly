@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\TransaccionController; // ← FALTA ESTO
+use App\Http\Controllers\MetaController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -38,4 +39,11 @@ Route::middleware('auth')->group(function () {
         'transacciones/categoria/{categoria}',
         [TransaccionController::class, 'porCategoria']
     )->name('transacciones.porCategoria');
+
+    Route::resource('metas', MetaController::class);
+
+    // Sub-recurso simple para aportes de cada meta
+    Route::post('metas/{meta}/aportes', [MetaController::class, 'storeAporte'])
+        ->name('metas.aportes.store');
+
 });

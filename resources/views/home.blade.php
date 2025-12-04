@@ -213,7 +213,7 @@
                class="tab {{ $tipoTab === 'ingreso' ? 'active' : '' }}">
                 INGRESOS
             </a>
-            <a href="#" class="tab" onclick="alert('Módulo de metas próximamente'); return false;">
+            <a href="{{ route('metas.index') }}" class="tab">
                 METAS
             </a>
         </div>

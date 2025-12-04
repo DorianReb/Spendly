@@ -6,23 +6,27 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title','Spendly — Bienestar y balance')</title>
 
-    {{-- Fonts + Icons (ya tienes FA en app.scss, pero lo dejo por si esta vista carga sola) --}}
+    {{-- Fonts + Icons --}}
     <link rel="dns-prefetch" href="//fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
 
-    {{-- Vite (Bootstrap + tu SCSS/JS) --}}
-    @vite(['resources/sass/app.scss','resources/js/app.js'])
-
-    {{--SweetAlert2--}}
+    {{-- 1. CARGA DE LIBRERÍAS DE TERCEROS (SweetAlert2 y Flatpickr) --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    {{-- Flatpickr CSS --}}
+    <!-- Tema oscuro de SweetAlert2 (deshabilitado por defecto) -->
+    <link
+        id="swal2-dark-theme"
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@5/dark.css"
+        disabled
+    >
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    {{-- Flatpickr JS --}}
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
 
-    {{-- SweetAlert para mensajes flash --}}
+    {{-- 2. VITE (CARGA tu CSS global y tu JS modular, incluyendo theme-switcher.js) --}}
+    @vite(['resources/sass/app.scss','resources/js/app.js'])
+
+    {{-- 3. SweetAlert para mensajes flash (Con soporte para Modo Oscuro) --}}
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             @if(session('success'))
@@ -30,7 +34,7 @@
                 icon: 'success',
                 title: 'Listo',
                 text: @json(session('success')),
-                confirmButtonColor: '#6C63FF',
+                confirmButtonColor: '#6C63FF'
             });
             @endif
 
@@ -39,52 +43,21 @@
                 icon: 'error',
                 title: 'Ups…',
                 text: @json(session('error')),
-                confirmButtonColor: '#6C63FF',
+                confirmButtonColor: '#6C63FF'
             });
             @endif
         });
     </script>
 
+    {{-- 4. Estilos de Layout (SÓLO ESTRUCTURA, las variables de color están en _theme.scss) --}}
     <style>
-        :root{
-            --morado:#6C63FF;
-            --amarillo:#FFCE45; /* más cálido, menos saturado */
-            --beige:#FAF3DD;
-            --gris:#2E2E2E;
-
-            --bg:var(--beige);
-            --text:var(--gris);
-            --card:#ffffff;
-            --muted:#666666;
-            --divider: color-mix(in oklab, var(--text) 14%, transparent);
-
-            --radius:1rem;
-            --shadow:0 10px 28px rgba(0,0,0,.08);
-            --w-sidebar:220px;
-            --pad-1:.75rem;
-            --pad-2:1rem;
-            --fs-0:clamp(.95rem,.9rem + .25vw,1.05rem);
-            --fs-1:clamp(1.1rem,1rem + .5vw,1.35rem);
-        }
-
-        html[data-theme="dark"]{
-            --bg:#141217;
-            --card:#1a171f;
-            --text:#e6e6eb;
-            --muted:#9d9daa;
-            --divider: color-mix(in oklab, var(--text) 25%, transparent);
-
-            /* Tonos adaptados al modo oscuro */
-            --morado:#7d72ff;  /* un poco más claro para resaltar sobre fondo oscuro */
-            --amarillo:#E9C66E; /* dorado suave, no chilla */
-            --beige:#242026;    /* beige neutro, mantiene coherencia */
-        }
+        /* Variables de color y correcciones de modo oscuro movidas a _theme.scss */
 
         html{ color-scheme: light dark }
         body{ margin:0; background:var(--bg); color:var(--text); font-family:'Nunito',system-ui,sans-serif; }
         .layout{ display:flex; min-height:100dvh; }
 
-        /* ===== Sidebar compacto ===== */
+        /* ===== Sidebar compacto - Estructura ===== */
         .sidebar{
             position:fixed; inset:0 auto 0 0; width:var(--w-sidebar);
             background:var(--card); border-right:1px solid var(--divider); box-shadow:var(--shadow);
@@ -121,7 +94,7 @@
         }
         .sb-link i{ width:1.1rem; text-align:center; opacity:.95; }
 
-        /* 👇 Hover morado y active morado como pediste */
+        /* Estilos de Hover/Active (Depende de variables CSS globales) */
         .sb-link:hover,
         .sb-link:focus{
             background: color-mix(in oklab, var(--morado) 20%, transparent);
@@ -169,14 +142,14 @@
             box-shadow:0 8px 22px rgba(108,99,255,.25);
         }
 
-        /* Contenido */
+        /* Contenido y Media Query */
         .content{ flex:1; width:100%; padding: var(--pad-2); }
         @media (min-width: 992px){
             .sidebar{ transform:none; }
             .sidebar-toggle{ display:none; }
             .content{ margin-left: var(--w-sidebar); }
 
-            /* ===== Toggle morado personalizado ===== */
+            /* Toggle morado personalizado (Depende de variables CSS globales) */
             .form-check-input:checked {
                 background-color: var(--morado) !important;
                 border-color: var(--morado) !important;
@@ -191,7 +164,6 @@
             .form-check-input {
                 cursor: pointer;
             }
-
         }
     </style>
 </head>
@@ -237,13 +209,13 @@
                 <i class="fa-solid fa-arrows-rotate"></i><span>Pagos habituales</span>
             </a>
             */--}}
-            <a href="{{ url('/recordatorios') }}" class="sb-link {{ request()->is('recordatorios*') ? 'active' : '' }}">
+            {{--}}<a href="{{ url('/recordatorios') }}" class="sb-link {{ request()->is('recordatorios*') ? 'active' : '' }}">
                 <i class="fa-solid fa-bell"></i><span>Recordatorios</span>
             </a>
             <a href="{{ url('/ajustes') }}" class="sb-link {{ request()->is('ajustes*') ? 'active' : '' }}">
                 <i class="fa-solid fa-gear"></i><span>Ajustes</span>
             </a>
-
+            {{--}}
             <div class="sb-sep"></div>
 
             @auth
@@ -304,33 +276,6 @@
         @yield('content')
     </main>
 </div>
-
-<script>
-    // --- Sidebar ---
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    const toggleBtn = document.querySelector('.sidebar-toggle');
-
-    function openSidebar(){ sidebar.dataset.open="true"; overlay.dataset.show="true"; toggleBtn?.setAttribute('aria-expanded','true'); }
-    function closeSidebar(){ sidebar.dataset.open="false"; overlay.dataset.show="false"; toggleBtn?.setAttribute('aria-expanded','false'); }
-
-    toggleBtn?.addEventListener('click', ()=> (sidebar.dataset.open==="true") ? closeSidebar() : openSidebar());
-    overlay?.addEventListener('click', closeSidebar);
-    sidebar.querySelectorAll('a.sb-link').forEach(a=>{
-        a.addEventListener('click', ()=> { if (window.innerWidth < 992) closeSidebar(); });
-    });
-    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && window.innerWidth<992) closeSidebar(); });
-
-    // --- Tema persistente ---
-    const themeToggle = document.getElementById('themeToggle');
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    if(themeToggle) themeToggle.checked = (savedTheme === 'dark');
-    themeToggle?.addEventListener('change', ()=>{
-        const t = themeToggle.checked ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', t);
-        localStorage.setItem('theme', t);
-    });
-</script>
+{{-- LÓGICA DE TEMA Y SIDEBAR MOVIDA A resources/js/theme-switcher.js --}}
 </body>
 </html>

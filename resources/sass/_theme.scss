@@ -1,0 +1,253 @@
+:root{
+    --morado:#6C63FF;
+    --amarillo:#FFCE45; /* más cálido, menos saturado */
+    --beige:#FAF3DD;
+    --gris:#2E2E2E;
+
+    --bg:var(--beige);
+    --text:var(--gris);
+    --card:#ffffff;
+    --muted:#666666;
+    --divider: color-mix(in oklab, var(--text) 14%, transparent);
+
+    --radius:1rem;
+    --shadow:0 10px 28px rgba(0,0,0,.08);
+    --w-sidebar:220px;
+    --pad-1:.75rem;
+    --pad-2:1rem;
+    --fs-0:clamp(.95rem,.9rem + .25vw,1.05rem);
+    --fs-1:clamp(1.1rem,1rem + .5vw,1.35rem);
+}
+
+html[data-theme="dark"]{
+    /* Variables principales corregidas para el modo oscuro */
+    --bg:#0e0c12; /* Fondo más oscuro */
+    --card:#1a171f;
+    --text:#d1d1d6; /* Texto suave */
+    --muted:#a9a9b3; /* Gris claro para texto secundario */
+    --divider: color-mix(in oklab, var(--text) 12%, transparent);
+
+    /* Tonos adaptados al modo oscuro */
+    --morado:#7d72ff;
+    --amarillo:#E9C66E;
+    --beige:#242026;
+}
+
+html{ color-scheme: light dark }
+body{ margin:0; background:var(--bg); color:var(--text); font-family:'Nunito',system-ui,sans-serif; }
+.layout{ display:flex; min-height:100dvh; }
+
+/* ===== Estilos Globales para Modo Oscuro (Legibilidad y Badges) ===== */
+
+/* Sobreescribe Bootstrap text-muted en modo oscuro (legibilidad) */
+html[data-theme="dark"] .text-muted {
+    color: var(--muted) !important;
+}
+
+/* Botón Outline Dark Fix (Botón Volver, etc.) */
+html[data-theme="dark"] .btn-outline-dark {
+    border-color: var(--muted);
+    color: var(--muted);
+    background: transparent;
+}
+html[data-theme="dark"] .btn-outline-dark:hover {
+    border-color: var(--morado);
+    color: var(--morado);
+    background: color-mix(in oklab, var(--morado) 12%, transparent);
+}
+
+/* Botón Outline Primary Fix (Añadir Aporte) */
+html[data-theme="dark"] .btn-outline-primary {
+    border-color: var(--morado);
+    color: var(--morado);
+    background: transparent;
+}
+html[data-theme="dark"] .btn-outline-primary:hover {
+    color: #fff; /* Texto blanco en hover sobre fondo morado */
+    background: var(--morado);
+    border-color: var(--morado);
+}
+
+/* Card Genérica Suave */
+.card-soft{
+    background:#fff; border-radius:var(--radius); padding:var(--pad-2);
+    box-shadow:var(--shadow); border:1px solid #f0f0f0;
+}
+html[data-theme="dark"] .card-soft{
+    background:var(--card);
+    border-color: color-mix(in oklab, var(--card) 45%, var(--morado));
+}
+
+/* Estilos de Insignias de Estado (Badges) */
+.badge-estado{
+    padding:.25rem .65rem; border-radius:999px; font-size:.75rem;
+    text-transform:uppercase; letter-spacing:.08em; font-weight:700;
+}
+/* Modo Claro */
+.badge-en_curso{ background:rgba(108,99,255,.16); color:#6C63FF; }
+.badge-pausada{ background:#ffeeba; color:#856404; }
+.badge-completada{ background:#d4edda; color:#155724; }
+.badge-cancelada{ background:#f8d7da; color:#721c24; }
+
+/* Modo Oscuro (Corrección de Contraste) */
+html[data-theme="dark"] .badge-en_curso{ background:color-mix(in oklab, var(--morado) 20%, transparent); color:var(--morado); }
+html[data-theme="dark"] .badge-pausada{ background:rgba(233,198,110,.25); color:var(--amarillo); }
+html[data-theme="dark"] .badge-completada{ background:rgba(21,180,80,.25); color:#6be689; }
+html[data-theme="dark"] .badge-cancelada{ background:rgba(255,100,100,.25); color:#f56767; }
+
+/* ===== Sidebar compacto (Mantenemos tus estilos) ===== */
+.sidebar{
+    position:fixed; inset:0 auto 0 0; width:var(--w-sidebar);
+    background:var(--card); border-right:1px solid var(--divider); box-shadow:var(--shadow);
+    transform:translateX(-100%); transition:transform .28s ease;
+    display:flex; flex-direction:column; z-index:1000;
+    overflow-y:auto; scrollbar-width:thin; scrollbar-gutter:stable;
+}
+/* ... (El resto de tus estilos del sidebar se mantienen sin cambios) ... */
+.sidebar[data-open="true"]{ transform:translateX(0); }
+
+.sb-header{
+    position:sticky; top:0; z-index:2;
+    padding: var(--pad-2); border-bottom:1px solid var(--divider);
+    background: color-mix(in oklab, var(--beige) 88%, var(--card));
+    display:flex; align-items:center; gap:.6rem;
+}
+.sb-avatar{
+    width:40px; height:40px; border-radius:50%;
+    display:grid; place-items:center; font-size:1rem;
+    background: color-mix(in oklab, var(--morado) 18%, var(--card));
+    color: var(--morado);
+    flex:0 0 auto;
+}
+.sb-title{ font-weight:800; font-size:var(--fs-1); line-height:1.05; }
+.sb-sub{ font-size:.9rem; color:var(--muted); }
+.link-inline{ color:var(--morado); text-decoration:none; font-weight:700; }
+.link-inline:hover{ text-decoration:underline; }
+
+.sb-nav{ padding: .5rem var(--pad-2) var(--pad-2); display:flex; flex-direction:column; gap:.25rem; }
+.sb-link{
+    display:flex; align-items:center; gap:.6rem;
+    padding:.55rem .6rem; border-radius:.7rem;
+    color:var(--text); text-decoration:none; font-weight:600; font-size:.97rem;
+    transition: background .18s ease, color .18s ease;
+}
+.sb-link i{ width:1.1rem; text-align:center; opacity:.95; }
+
+/* 👇 Hover morado y active morado como pediste */
+.sb-link:hover,
+.sb-link:focus{
+    background: color-mix(in oklab, var(--morado) 20%, transparent);
+    color: var(--morado);
+    outline: none;
+}
+.sb-link.active{
+    background: color-mix(in oklab, var(--morado) 22%, transparent);
+    color: var(--morado);
+    outline: 2px solid color-mix(in oklab, var(--morado) 32%, transparent);
+}
+
+.sb-sep{ height:1px; background:var(--divider); margin:.6rem var(--pad-2); }
+
+.sb-footer{
+    position:sticky; bottom:0; z-index:1;
+    padding: var(--pad-2); border-top:1px solid var(--divider);
+    background: color-mix(in oklab, var(--beige) 94%, var(--card));
+    display:flex; flex-direction:column; gap:.6rem;
+}
+.theme-row{ display:flex; align-items:center; justify-content:space-between; gap:.5rem; }
+.theme-row .label{ display:flex; align-items:center; gap:.5rem; }
+
+.sb-cta{
+    display:inline-flex; align-items:center; gap:.5rem; justify-content:center;
+    padding:.55rem .85rem; border:none; border-radius:999px;
+    background: var(--morado); color:#fff; font-weight:800;
+    box-shadow:0 8px 22px rgba(108,99,255,.18);
+    text-decoration:none;
+}
+.sb-cta.alt{ background: var(--amarillo); color:#3a3220; box-shadow:none; }
+
+/* Overlay móvil */
+.sidebar-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.35); backdrop-filter:blur(2px);
+    opacity:0; visibility:hidden; transition:.2s; z-index:990;
+}
+.sidebar-overlay[data-show="true"]{ opacity:1; visibility:visible; }
+
+/* Botón hamburguesa */
+.sidebar-toggle{
+    position:fixed; left:.6rem; top:.6rem; z-index:1100;
+    border:none; background:var(--morado); color:#fff;
+    padding:.5rem .7rem; border-radius:.7rem; display:flex; align-items:center; gap:.45rem;
+    box-shadow:0 8px 22px rgba(108,99,255,.25);
+}
+
+/* Contenido */
+.content{ flex:1; width:100%; padding: var(--pad-2); }
+@media (min-width: 992px){
+    .sidebar{ transform:none; }
+    .sidebar-toggle{ display:none; }
+    .content{ margin-left: var(--w-sidebar); }
+
+    /* ===== Toggle morado personalizado ===== */
+    .form-check-input:checked {
+        background-color: var(--morado) !important;
+        border-color: var(--morado) !important;
+        box-shadow: 0 0 0 0.25rem color-mix(in oklab, var(--morado) 35%, transparent) !important;
+    }
+
+    .form-check-input:focus {
+        border-color: var(--morado) !important;
+        box-shadow: 0 0 0 0.25rem color-mix(in oklab, var(--morado) 25%, transparent) !important;
+    }
+
+    .form-check-input {
+        cursor: pointer;
+    }
+
+    /* --- Mensajes de Ayuda / Hints --- */
+    .hint-box{
+        border-radius:var(--radius);
+        padding:.75rem .8rem;
+        font-size:.85rem;
+        margin-bottom:.9rem;
+    }
+    .hint-box-default{
+        background: color-mix(in oklab, var(--amarillo) 12%, transparent);
+        color:#5b4a20;
+    }
+    html[data-theme="dark"] .hint-box-default{
+        background: color-mix(in oklab, var(--amarillo) 10%, transparent);
+        color: var(--amarillo);
+        border: 1px solid color-mix(in oklab, var(--amarillo) 20%, transparent);
+    }
+
+    /* --- Modales de Bootstrap en Modo Oscuro --- */
+    html[data-theme="dark"] .modal-content {
+        background-color: var(--card); /* Fondo oscuro de la tarjeta */
+        color: var(--text);            /* Texto principal claro */
+        border: 1px solid var(--divider);
+    }
+
+    html[data-theme="dark"] .modal-header {
+        border-bottom-color: var(--divider); /* Separador sutil */
+    }
+
+    html[data-theme="dark"] .modal-footer {
+        border-top-color: var(--divider); /* Separador sutil */
+    }
+
+    /* Corregir el botón de cerrar modal (X) */
+    html[data-theme="dark"] .btn-close {
+        background-color: transparent;
+        filter: invert(1) grayscale(100%) brightness(200%); /* Hace el ícono blanco/gris claro */
+    }
+
+    /* Corregir los inputs y textarea dentro del modal (si no están ya cubiertos por Bootstrap) */
+    html[data-theme="dark"] .modal-body .form-control,
+    html[data-theme="dark"] .modal-body .input-group-text {
+        background-color: var(--bg); /* Fondo del campo de texto ligeramente más claro que el fondo del modal */
+        border-color: var(--divider);
+        color: var(--text);
+    }
+
+}

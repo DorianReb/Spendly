@@ -10,6 +10,9 @@
 @import "bootstrap/scss/variables";
 @import "bootstrap/scss/maps";
 
+// Importa tus estilos globales (variables, modo oscuro, cards, badges)
+@import "theme";
+
 $theme-colors: (
     "primary":    $primary,
     "secondary":  $secondary,
