@@ -14,23 +14,56 @@ class MetaController extends Controller
         $this->middleware('auth');
     }
 
+    /* ---------------------------------------------------------
+     |   MÉTODO PRIVADO PARA PARSEAR FECHAS dd/mm/yy → Y-m-d
+     ----------------------------------------------------------*/
+    private function parseFecha($fecha)
+    {
+        if (!$fecha) return null;
+
+        // dd/mm/yyyy
+        if (str_contains($fecha, '/')) {
+            try {
+                return Carbon::createFromFormat('d/m/Y', $fecha)->format('Y-m-d');
+            } catch (\Exception $e) {}
+
+            // dd/mm/yy
+            try {
+                return Carbon::createFromFormat('d/m/y', $fecha)->format('Y-m-d');
+            } catch (\Exception $e) {}
+        }
+
+        // Si viene en formato estándar
+        try {
+            return Carbon::parse($fecha)->format('Y-m-d');
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
     /**
      * Listado de metas del usuario.
-     * En las vistas puedes usar:
-     *  - $meta->total_aportado
-     *  - $meta->porcentaje
-     *  - $meta->restante
+     * Separadas entre activas y completadas.
      */
     public function index()
     {
         $usuarioId = auth()->id();
 
-        $metas = Meta::where('usuario_id', $usuarioId)
-            ->with('aportes') // para evitar N+1 (opcional pero recomendable)
+        // Metas activas (TODO menos completadas)
+        $metasActivas = Meta::where('usuario_id', $usuarioId)
+            ->where('estado', '!=', 'completada')
+            ->with('aportes')
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('metas.index', compact('metas'));
+        // Metas completadas enviadas al final
+        $metasCompletadas = Meta::where('usuario_id', $usuarioId)
+            ->where('estado', 'completada')
+            ->with('aportes')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('metas.index', compact('metasActivas', 'metasCompletadas'));
     }
 
     /**
@@ -42,27 +75,21 @@ class MetaController extends Controller
     }
 
     /**
-     * Detalle de una meta + aportes
+     * Mostrar meta + aportes
      */
     public function show(Meta $meta)
     {
-        // Asegurar que la meta es del usuario autenticado
         $this->authorizeMeta($meta);
 
-        // Traer aportes relacionados
         $meta->load(['aportes' => function($q) {
             $q->orderBy('fecha', 'desc');
         }]);
 
-        // Usamos los accessors del modelo
-        $totalAportado = $meta->total_aportado;
-        $porcentaje    = $meta->porcentaje;
-
         return view('metas.show', [
             'meta'          => $meta,
             'aportes'       => $meta->aportes,
-            'totalAportado' => $totalAportado,
-            'porcentaje'    => $porcentaje,
+            'totalAportado' => $meta->total_aportado,
+            'porcentaje'    => $meta->porcentaje,
         ]);
     }
 
@@ -73,42 +100,38 @@ class MetaController extends Controller
     {
         $usuarioId = auth()->id();
 
-        // 1) Tomar el valor “real” del objetivo
-        //    - Primero intenta con el hidden (name="objetivo")
-        //    - Si por X razón viniera sólo del visible (objetivo_mask), también lo tomamos
+        // OBJETIVO
         $rawObjetivo = $request->input('objetivo', $request->input('objetivo_mask'));
-
         if ($rawObjetivo !== null) {
-            // Quitar comas y espacios: "10,000.50" -> "10000.50"
             $rawObjetivo = str_replace([',', ' '], '', $rawObjetivo);
         }
 
-        // 2) Validar
         $validated = $request->validate([
             'nombre'                  => 'required|string|max:100',
-            'fecha_limite'            => 'nullable|date|after:today',
+            'fecha_limite'            => 'nullable',
             'aporte_mensual_sugerido' => 'nullable|numeric|min:0',
             'estado'                  => 'nullable|in:en_curso,completada,pausada,cancelada',
         ]);
 
-        // Si no hay objetivo válido, lanzamos error de validación manualmente
+        // Validar objetivo manualmente
         if ($rawObjetivo === null || $rawObjetivo === '' || !is_numeric($rawObjetivo) || $rawObjetivo <= 0) {
             return back()
                 ->withErrors(['objetivo' => 'El monto objetivo es obligatorio y debe ser mayor a 0.'])
                 ->withInput();
         }
 
-        // 3) Armar el arreglo final para create()
-        $data = $validated;
-        $data['usuario_id'] = $usuarioId;
-        $data['objetivo']   = $rawObjetivo;   // 👈 se guarda en la columna correcta
+        // Convertir fecha
+        $fechaLimite = $this->parseFecha($validated['fecha_limite'] ?? null);
 
-        // Si no viene estado, dejamos que la BD use su default (en_curso)
-        if (empty($data['estado'])) {
-            unset($data['estado']);
-        }
-
-        Meta::create($data);
+        // Crear meta
+        Meta::create([
+            'usuario_id' => $usuarioId,
+            'nombre'     => $validated['nombre'],
+            'objetivo'   => $rawObjetivo,
+            'fecha_limite' => $fechaLimite,
+            'aporte_mensual_sugerido' => $validated['aporte_mensual_sugerido'] ?? null,
+            'estado' => $validated['estado'] ?? 'en_curso',
+        ]);
 
         return redirect()
             ->route('metas.index')
@@ -116,12 +139,11 @@ class MetaController extends Controller
     }
 
     /**
-     * Editar meta
+     * Editar
      */
     public function edit(Meta $meta)
     {
         $this->authorizeMeta($meta);
-
         return view('metas.edit', compact('meta'));
     }
 
@@ -135,10 +157,13 @@ class MetaController extends Controller
         $data = $request->validate([
             'nombre'        => 'required|string|max:140',
             'objetivo'      => 'required|numeric|min:0.01',
-            'fecha_limite'  => 'nullable|date',
+            'fecha_limite'  => 'nullable',
             'estado'        => 'required|in:en_curso,pausada,completada,cancelada',
             'aporte_mensual_sugerido' => 'nullable|numeric|min:0',
         ]);
+
+        // Convertir fecha
+        $data['fecha_limite'] = $this->parseFecha($data['fecha_limite'] ?? null);
 
         $meta->update($data);
 
@@ -148,7 +173,7 @@ class MetaController extends Controller
     }
 
     /**
-     * Eliminar (soft delete) una meta
+     * Eliminar meta
      */
     public function destroy(Meta $meta)
     {
@@ -162,8 +187,7 @@ class MetaController extends Controller
     }
 
     /**
-     * Registrar un aporte a una meta
-     * Actualiza automáticamente el estado si llega al 100%.
+     * Registrar aporte
      */
     public function storeAporte(Request $request, Meta $meta)
     {
@@ -171,22 +195,32 @@ class MetaController extends Controller
 
         $data = $request->validate([
             'monto' => 'required|numeric|min:0.01',
-            'fecha' => 'required|date|before_or_equal:today',
+            'fecha' => 'required',
             'nota'  => 'nullable|string|max:255',
         ]);
+
+        // Convertir fecha de aporte
+        $fechaAporte = $this->parseFecha($data['fecha']);
+
+        if (!$fechaAporte) {
+            return back()
+                ->withErrors(['fecha' => 'El formato de fecha no es válido.'])
+                ->withInput();
+        }
 
         AporteMeta::create([
             'meta_id'        => $meta->id,
             'usuario_id'     => auth()->id(),
-            'transaccion_id' => null,      // si luego la vinculas a una transacción, lo llenas
+            'transaccion_id' => null,
             'monto'          => $data['monto'],
-            'fecha'          => $data['fecha'],
+            'fecha'          => $fechaAporte,
             'nota'           => $data['nota'] ?? null,
         ]);
 
-        // 🔄 Recalcular progreso y, si aplica, marcar completada
+        // Recalcular progreso
         $meta->refresh();
 
+        // Si completó la meta → marcar completada
         if ($meta->porcentaje >= 100 && $meta->estado === 'en_curso') {
             $meta->estado = 'completada';
             $meta->save();
@@ -198,7 +232,7 @@ class MetaController extends Controller
     }
 
     /**
-     * Verificación simple de que la meta pertenece al usuario logueado
+     * Verifica que la meta pertenece al usuario
      */
     protected function authorizeMeta(Meta $meta)
     {

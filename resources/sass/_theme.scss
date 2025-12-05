@@ -95,6 +95,15 @@ html[data-theme="dark"] .badge-pausada{ background:rgba(233,198,110,.25); color:
 html[data-theme="dark"] .badge-completada{ background:rgba(21,180,80,.25); color:#6be689; }
 html[data-theme="dark"] .badge-cancelada{ background:rgba(255,100,100,.25); color:#f56767; }
 
+/* ============================
+   Ajuste mínimo para SweetAlert2 theme-dark:
+   sólo personalizamos el botón de confirmación
+   ============================ */
+.swal2-theme-dark .swal2-confirm {
+    background-color: var(--morado) !important;
+    border-color: var(--morado) !important;
+}
+
 /* ===== Sidebar compacto (Mantenemos tus estilos) ===== */
 .sidebar{
     position:fixed; inset:0 auto 0 0; width:var(--w-sidebar);
@@ -103,7 +112,6 @@ html[data-theme="dark"] .badge-cancelada{ background:rgba(255,100,100,.25); colo
     display:flex; flex-direction:column; z-index:1000;
     overflow-y:auto; scrollbar-width:thin; scrollbar-gutter:stable;
 }
-/* ... (El resto de tus estilos del sidebar se mantienen sin cambios) ... */
 .sidebar[data-open="true"]{ transform:translateX(0); }
 
 .sb-header{
@@ -133,7 +141,7 @@ html[data-theme="dark"] .badge-cancelada{ background:rgba(255,100,100,.25); colo
 }
 .sb-link i{ width:1.1rem; text-align:center; opacity:.95; }
 
-/* 👇 Hover morado y active morado como pediste */
+/* Hover / Active */
 .sb-link:hover,
 .sb-link:focus{
     background: color-mix(in oklab, var(--morado) 20%, transparent);
@@ -183,6 +191,7 @@ html[data-theme="dark"] .badge-cancelada{ background:rgba(255,100,100,.25); colo
 
 /* Contenido */
 .content{ flex:1; width:100%; padding: var(--pad-2); }
+
 @media (min-width: 992px){
     .sidebar{ transform:none; }
     .sidebar-toggle{ display:none; }
@@ -223,31 +232,121 @@ html[data-theme="dark"] .badge-cancelada{ background:rgba(255,100,100,.25); colo
 
     /* --- Modales de Bootstrap en Modo Oscuro --- */
     html[data-theme="dark"] .modal-content {
-        background-color: var(--card); /* Fondo oscuro de la tarjeta */
-        color: var(--text);            /* Texto principal claro */
+        background-color: var(--card) !important;
+        color: var(--text);
         border: 1px solid var(--divider);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     }
 
     html[data-theme="dark"] .modal-header {
-        border-bottom-color: var(--divider); /* Separador sutil */
+        border-bottom-color: var(--divider);
     }
 
     html[data-theme="dark"] .modal-footer {
-        border-top-color: var(--divider); /* Separador sutil */
+        border-top-color: var(--divider);
     }
 
-    /* Corregir el botón de cerrar modal (X) */
+    html[data-theme="dark"] .modal-backdrop {
+        background-color: #000000;
+    }
+    html[data-theme="dark"] .modal-backdrop.show {
+        opacity: 0.75;
+    }
+
     html[data-theme="dark"] .btn-close {
         background-color: transparent;
-        filter: invert(1) grayscale(100%) brightness(200%); /* Hace el ícono blanco/gris claro */
+        filter: invert(1) grayscale(100%) brightness(200%);
     }
 
-    /* Corregir los inputs y textarea dentro del modal (si no están ya cubiertos por Bootstrap) */
     html[data-theme="dark"] .modal-body .form-control,
     html[data-theme="dark"] .modal-body .input-group-text {
-        background-color: var(--bg); /* Fondo del campo de texto ligeramente más claro que el fondo del modal */
+        background-color: var(--bg);
         border-color: var(--divider);
         color: var(--text);
     }
 
+    /* ============================================
+       BLOQUE ANTIGUO PARA SweetAlert2 BASADO EN body.swal2-dark
+       (se deja comentado para referencia, ya no se usa)
+       ============================================ */
+
+    /*
+    body.swal2-dark .swal2-success .swal2-success-ring,
+    body.swal2-dark .swal2-success .swal2-success-circular-line-left,
+    body.swal2-dark .swal2-success .swal2-success-circular-line-right {
+        background-color: transparent !important;
+    }
+
+    body.swal2-dark .swal2-popup {
+        background: var(--card);
+        color: var(--text);
+        border: 1px solid var(--divider);
+    }
+
+    body.swal2-dark .swal2-title {
+        color: var(--text);
+    }
+
+    body.swal2-dark .swal2-html-container {
+        color: var(--muted);
+    }
+
+    body.swal2-dark .swal2-icon.swal2-success,
+    body.swal2-dark .swal2-icon.swal2-error,
+    body.swal2-dark .swal2-icon.swal2-warning,
+    body.swal2-dark .swal2-icon.swal2-info,
+    body.swal2-dark .swal2-icon.swal2-question {
+        border-color: var(--morado);
+    }
+
+    body.swal2-dark .swal2-confirm {
+        background-color: var(--morado) !important;
+        border-color: var(--morado) !important;
+        color: #fff !important;
+    }
+
+    body.swal2-dark .swal2-cancel {
+        background-color: transparent !important;
+        border: 1px solid var(--divider) !important;
+        color: var(--muted) !important;
+    }
+
+    body.swal2-dark .swal2-input {
+        background-color: var(--bg);
+        border-color: var(--divider);
+        color: var(--text);
+    }
+    */
+
+    /* ============================
+       Flatpickr - retoques para tema oscuro
+       ============================ */
+
+    html[data-theme="dark"] .flatpickr-calendar {
+        background: var(--card);
+        color: var(--text);
+        border: 1px solid var(--divider);
+    }
+
+    html[data-theme="dark"] .flatpickr-day {
+        color: var(--text);
+    }
+
+    html[data-theme="dark"] .flatpickr-day:hover,
+    html[data-theme="dark"] .flatpickr-day:focus {
+        background: color-mix(in oklab, var(--morado) 30%, transparent);
+        color: #fff;
+    }
+
+    html[data-theme="dark"] .flatpickr-day.today {
+        border-color: var(--morado);
+    }
+
+    html[data-theme="dark"] .flatpickr-day.selected,
+    html[data-theme="dark"] .flatpickr-day.startRange,
+    html[data-theme="dark"] .flatpickr-day.endRange {
+        background: var(--morado);
+        border-color: var(--morado);
+        color: #fff;
+    }
 }

@@ -114,7 +114,7 @@
                            name="fecha"
                            id="fecha"
                            class="form-control js-date @error('fecha') is-invalid @enderror"
-                           value="{{ old('fecha', \Carbon\Carbon::parse($transaccion->fecha)->toDateString()) }}"
+                           value="{{ old('fecha', \Carbon\Carbon::parse($transaccion->fecha)->format('d/m/Y')) }}"
                            required
                            autocomplete="off">
                     @error('fecha')
@@ -123,6 +123,7 @@
                         <div class="form-text">Modifica la fecha si fue un día diferente.</div>
                         @enderror
                 </div>
+
 
                 {{-- Nota --}}
                 <div class="mb-3">
@@ -155,10 +156,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             if (window.flatpickr) {
                 flatpickr('.js-date', {
-                    dateFormat: 'Y-m-d',
+                    dateFormat: 'd/m/Y',
                     locale: 'es',
-                    defaultDate: "{{ old('fecha', $transaccion->fecha->toDateString()) }}",
-                    maxDate: "{{ now()->toDateString() }}",
+                    defaultDate: "{{ old('fecha', \Carbon\Carbon::parse($transaccion->fecha)->format('d/m/Y')) }}",
+                    maxDate: "{{ now()->format('d/m/Y') }}",
                     allowInput: true
                 });
             }
@@ -166,5 +167,4 @@
     </script>
 @endsection
 
-@endsection
 

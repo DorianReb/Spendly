@@ -3,46 +3,78 @@
 
 @section('content')
     <style>
-        :root{
-            --morado:#6C63FF; --amarillo:#FFD460; --beige:#FAF3DD; --gris:#2E2E2E;
-            --bg:var(--beige); --text:var(--gris); --card:#fff; --muted:#8b8b8b;
-            --radius:1.2rem;
+        .cats-wrap{
+            max-width:680px;
+            margin-inline:auto;
+            padding:.5rem .25rem 1.5rem;
         }
-
-        .cats-wrap{ max-width:680px; margin-inline:auto; padding:.5rem .25rem 1.5rem; }
 
         .cats-topbar{
-            display:flex; align-items:center; justify-content:space-between; gap:.75rem;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:.75rem;
             margin-bottom:.75rem;
         }
-        .cats-title{ font-weight:800; letter-spacing:.02em; font-size:1.05rem; }
-        .cats-sub{ font-size:.9rem; color:var(--muted); }
+        .cats-title{
+            font-weight:800;
+            letter-spacing:.02em;
+            font-size:1.05rem;
+        }
+        .cats-sub{
+            font-size:.9rem;
+            color:var(--muted);
+        }
 
         .pill-tipo{
-            display:inline-flex; align-items:center; gap:.35rem;
-            padding:.25rem .7rem; border-radius:999px;
-            font-size:.8rem; font-weight:700; letter-spacing:.06em;
+            display:inline-flex;
+            align-items:center;
+            gap:.35rem;
+            padding:.25rem .7rem;
+            border-radius:999px;
+            font-size:.8rem;
+            font-weight:700;
+            letter-spacing:.06em;
             text-transform:uppercase;
             background: color-mix(in oklab, var(--morado) 14%, transparent);
             color: var(--morado);
         }
 
         .panel{
-            background: var(--card); border-radius: 1rem;
+            background: var(--card);
+            border-radius: 1rem;
             padding: 1rem 1.1rem 1.3rem;
+            border: 1px solid color-mix(in oklab, var(--text) 10%, transparent);
             box-shadow: 0 10px 28px rgba(0,0,0,.06);
         }
+        html[data-theme="dark"] .panel{
+            border-color: var(--divider);
+            box-shadow: 0 10px 28px rgba(0,0,0,.4);
+        }
 
-        .form-label{ font-weight:700; font-size:.9rem; }
-        .form-text{ font-size:.8rem; color:var(--muted); }
+        .form-label{
+            font-weight:700;
+            font-size:.9rem;
+        }
+        .form-text{
+            font-size:.8rem;
+            color:var(--muted);
+        }
 
         .color-row{
-            display:flex; align-items:center; gap:.75rem;
+            display:flex;
+            align-items:center;
+            gap:.75rem;
         }
         .color-preview{
-            width:40px; height:40px; border-radius:999px;
+            width:40px;
+            height:40px;
+            border-radius:999px;
             box-shadow:0 8px 18px rgba(0,0,0,.12);
-            border:2px solid #fff;
+            border:2px solid rgba(255,255,255,.75);
+        }
+        html[data-theme="dark"] .color-preview{
+            border-color: rgba(255,255,255,.25);
         }
 
         .btn-ghost{
@@ -51,6 +83,18 @@
             background:transparent;
             font-weight:600;
             padding:.45rem 1rem;
+            color:var(--text);
+        }
+        html[data-theme="dark"] .btn-ghost{
+            border-color: var(--divider);
+        }
+        .btn-ghost:hover{
+            background:color-mix(in oklab, var(--morado) 10%, transparent);
+            color:var(--morado);
+        }
+
+        .icon-option.active{
+            outline:2px solid var(--morado);
         }
     </style>
 
@@ -88,7 +132,7 @@
                 @csrf
                 @method('PUT')
 
-                {{-- Tipo: ahora sí editable (gasto / ingreso) --}}
+                {{-- Tipo editable --}}
                 <div class="mb-3">
                     <label class="form-label d-block">Tipo</label>
                     @php
@@ -165,7 +209,6 @@
                 <div class="mb-3">
                     <label class="form-label d-block">Símbolo</label>
 
-                    {{-- preview grande --}}
                     <div class="d-flex align-items-center gap-3 mb-2">
                         <div id="symbolPreview"
                              class="color-preview d-flex align-items-center justify-content-center"
@@ -175,7 +218,6 @@
                         <div class="form-text">Este ícono aparecerá en el círculo de la categoría.</div>
                     </div>
 
-                    {{-- íconos rápidos --}}
                     <div class="d-flex flex-wrap gap-2 mb-2" id="quickIcons">
                         @foreach([
                             'fa-wallet', 'fa-cart-shopping', 'fa-heart-pulse', 'fa-bus',
@@ -189,7 +231,6 @@
                             </button>
                         @endforeach
 
-                        {{-- botón "..." para catálogo completo --}}
                         <button type="button"
                                 class="btn btn-warning btn-sm"
                                 style="border-radius:999px; width:40px; height:40px; font-weight:700;"
@@ -199,9 +240,7 @@
                         </button>
                     </div>
 
-                    {{-- input oculto real --}}
                     <input type="hidden" name="icon" id="iconInput" value="{{ $iconDefault }}">
-
                     @error('icon')
                     <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
@@ -251,7 +290,7 @@
         </section>
     </div>
 
-    {{-- === MODAL CATÁLOGO DE ICONOS (mismo que en create) === --}}
+    {{-- Modal catálogo de iconos --}}
     <div class="modal fade" id="iconCatalogModal" tabindex="-1" aria-labelledby="iconCatalogLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable modal-lg">
             <div class="modal-content">
@@ -314,12 +353,12 @@
         </div>
     </div>
 
-    {{-- === JS: color + selección de iconos === --}}
+    {{-- JS: color + selección de iconos --}}
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const inputColor     = document.getElementById('color_hex');
-            const previewColor   = document.getElementById('colorPreview');
-            const symbolPreview  = document.getElementById('symbolPreview');
+            const inputColor    = document.getElementById('color_hex');
+            const previewColor  = document.getElementById('colorPreview');
+            const symbolPreview = document.getElementById('symbolPreview');
 
             if (inputColor) {
                 const updateColor = () => {

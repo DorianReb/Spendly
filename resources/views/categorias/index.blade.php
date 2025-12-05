@@ -3,52 +3,87 @@
 
 @section('content')
     <style>
-        :root{
-            --morado:#6C63FF; --amarillo:#FFD460; --beige:#FAF3DD; --gris:#2E2E2E;
-            --bg:var(--beige); --text:var(--gris); --card:#fff; --muted:#8b8b8b;
-            --radius:1.2rem;
+        .cats-wrap{
+            max-width:980px;
+            margin-inline:auto;
+            padding: .25rem .25rem 1rem;
         }
-        .cats-wrap{ max-width:980px; margin-inline:auto; padding: .25rem .25rem 1rem; }
 
         .cats-topbar{
             display:flex; align-items:center; justify-content:space-between; gap:.75rem;
             margin-bottom:.35rem;
         }
-        .cats-title{ font-weight:800; letter-spacing:.02em; }
+        .cats-title{
+            font-weight:800;
+            letter-spacing:.02em;
+            font-size:1.05rem;
+        }
 
         .tabs-cats{
-            display:flex; gap:1.5rem; border-bottom:1px solid color-mix(in oklab, var(--text) 10%, transparent);
-            margin:.3rem 0 1rem; padding-inline:.25rem;
+            display:flex;
+            gap:1.5rem;
+            border-bottom:1px solid color-mix(in oklab, var(--text) 10%, transparent);
+            margin:.3rem 0 1rem;
+            padding-inline:.25rem;
         }
         .tabs-cats .tab{
-            position:relative; padding:.65rem .2rem; text-decoration:none;
+            position:relative;
+            padding:.65rem .2rem;
+            text-decoration:none;
             color: color-mix(in oklab, var(--text) 65%, transparent);
-            font-weight:900; letter-spacing:.02em; cursor:pointer; border:none; background:transparent;
+            font-weight:900;
+            letter-spacing:.02em;
+            cursor:pointer;
+            border:none;
+            background:transparent;
         }
-        .tabs-cats .tab.active{ color: var(--text); }
+        .tabs-cats .tab.active{
+            color: var(--text);
+        }
         .tabs-cats .tab.active::after{
-            content:""; position:absolute; left:0; right:0; bottom:-1px; height:3px;
-            background:var(--morado); border-radius:2px;
+            content:"";
+            position:absolute;
+            left:0; right:0; bottom:-1px;
+            height:3px;
+            background:var(--morado);
+            border-radius:2px;
         }
 
         .panel{
-            background: var(--card); border-radius: 1rem; padding: 1rem;
+            background: var(--card);
+            border-radius: 1rem;
+            padding: 1rem;
             box-shadow: 0 10px 28px rgba(0,0,0,.06);
+            border: 1px solid color-mix(in oklab, var(--text) 8%, transparent);
+        }
+        html[data-theme="dark"] .panel{
+            box-shadow: 0 10px 28px rgba(0,0,0,.45);
+            border-color: var(--divider);
         }
 
         .cat-grid{
             --size:86px;
-            display:grid; gap:1rem;
+            display:grid;
+            gap:1rem;
             grid-template-columns: repeat(3, minmax(0,1fr));
         }
-        @media(min-width:480px){ .cat-grid{ grid-template-columns: repeat(4, minmax(0,1fr)); } }
-        @media(min-width:992px){ .cat-grid{ grid-template-columns: repeat(6, minmax(0,1fr)); } }
+        @media(min-width:480px){
+            .cat-grid{ grid-template-columns: repeat(4, minmax(0,1fr)); }
+        }
+        @media(min-width:992px){
+            .cat-grid{ grid-template-columns: repeat(6, minmax(0,1fr)); }
+        }
 
         .cat-item{
-            display:grid; justify-items:center; gap:.5rem; text-align:center;
-            cursor:pointer; text-decoration:none; color:inherit;
+            display:grid;
+            justify-items:center;
+            gap:.5rem;
+            text-align:center;
+            cursor:pointer;
+            text-decoration:none;
+            color:inherit;
 
-            /* 👇 reset de botón */
+            /* reset de botón */
             background:transparent;
             border:none;
             padding:0;
@@ -61,10 +96,14 @@
         }
 
         .cat-icon{
-            width:var(--size); height:var(--size); border-radius:999px;
-            display:grid; place-items:center;
+            width:var(--size);
+            height:var(--size);
+            border-radius:999px;
+            display:grid;
+            place-items:center;
             box-shadow: 0 8px 18px rgba(0,0,0,.12);
-            position:relative; isolation:isolate;
+            position:relative;
+            isolation:isolate;
             color:#fff;
         }
         .cat-icon i{
@@ -72,22 +111,32 @@
             filter: drop-shadow(0 2px 6px rgba(0,0,0,.25));
         }
         .cat-icon::after{
-            content:""; position:absolute; inset:8px; border-radius:999px;
+            content:"";
+            position:absolute;
+            inset:8px;
+            border-radius:999px;
             border:2px solid rgba(255,255,255,.75);
-            pointer-events:none; mix-blend:screen;
+            pointer-events:none;
+            mix-blend:screen;
         }
+
         .cat-name{
-            font-weight:700; color:var(--text); font-size:.95rem; line-height:1.1;
+            font-weight:700;
+            color:var(--text);
+            font-size:.95rem;
+            line-height:1.1;
         }
 
         .cat-create .cat-icon{
-            background:var(--amarillo); color:#2f2a18;
+            background:var(--amarillo);
+            color:#2f2a18;
         }
 
         /* Estado seleccionado */
         .cat-item.selected .cat-icon{
-            box-shadow:0 0 0 3px color-mix(in oklab, var(--morado) 40%, transparent),
-            0 10px 24px rgba(0,0,0,.18);
+            box-shadow:
+                0 0 0 3px color-mix(in oklab, var(--morado) 40%, transparent),
+                0 10px 24px rgba(0,0,0,.18);
             transform:translateY(-2px);
         }
         .cat-item.selected .cat-name{
@@ -99,17 +148,29 @@
             margin-top:1rem;
             padding:.6rem .9rem;
             border-radius:.9rem;
-            background: color-mix(in oklab, var(--card) 90%, var(--beige));
+            background: color-mix(in oklab, var(--card) 92%, var(--bg));
             border:1px solid color-mix(in oklab, var(--text) 10%, transparent);
-            display:flex; align-items:center; justify-content:space-between; gap:.75rem;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:.75rem;
             font-size:.9rem;
         }
+        html[data-theme="dark"] .cat-actions{
+            background: color-mix(in oklab, var(--card) 85%, var(--bg));
+            border-color: var(--divider);
+        }
+
         .cat-actions-name{
             font-weight:700;
         }
-        .cat-actions small{ color:var(--muted); }
+        .cat-actions small{
+            color:var(--muted);
+        }
 
-        .cat-actions.d-none{ display:none !important; }
+        .cat-actions.d-none{
+            display:none !important;
+        }
     </style>
 
     <div class="cats-wrap">
@@ -209,9 +270,9 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const tabs = document.querySelectorAll('#tabsCats .tab');
-            const gastos = document.getElementById('tab-gastos');
-            const ingresos = document.getElementById('tab-ingresos');
+            const tabs       = document.querySelectorAll('#tabsCats .tab');
+            const gastos     = document.getElementById('tab-gastos');
+            const ingresos   = document.getElementById('tab-ingresos');
 
             const actionsBar   = document.getElementById('catActions');
             const actionsName  = document.getElementById('catActionsName');
@@ -220,8 +281,8 @@
             const btnDeleteCat = document.getElementById('btnDeleteCat');
             const deleteForm   = document.getElementById('deleteCatForm');
 
-            let selectedItem = null;
-            let selectedEditUrl = null;
+            let selectedItem      = null;
+            let selectedEditUrl   = null;
             let selectedDeleteUrl = null;
 
             // Cambio de pestañas
@@ -247,29 +308,26 @@
             function attachCatClickHandlers() {
                 document.querySelectorAll('.cat-item[data-id]').forEach(item => {
                     item.addEventListener('click', () => {
-                        // evitar seleccionar el botón "Crear"
                         if (!item.dataset.id) return;
 
-                        // si vuelves a hacer click sobre la misma, deseleccionar
                         if (selectedItem === item) {
                             clearSelection();
                             return;
                         }
 
-                        // limpiar selección anterior
-                        document.querySelectorAll('.cat-item.selected').forEach(el => el.classList.remove('selected'));
+                        document.querySelectorAll('.cat-item.selected')
+                            .forEach(el => el.classList.remove('selected'));
 
                         selectedItem = item;
                         item.classList.add('selected');
 
-                        const nombre   = item.dataset.nombre || 'Categoría';
-                        selectedEditUrl   = item.dataset.editUrl || '#';
+                        const nombre = item.dataset.nombre || 'Categoría';
+                        selectedEditUrl   = item.dataset.editUrl   || '#';
                         selectedDeleteUrl = item.dataset.deleteUrl || '#';
 
                         actionsName.textContent = nombre;
                         actionsHint.textContent = 'Seleccionada';
-
-                        btnEditCat.href = selectedEditUrl;
+                        btnEditCat.href        = selectedEditUrl;
 
                         actionsBar.classList.remove('d-none');
                     });
@@ -277,10 +335,11 @@
             }
 
             function clearSelection() {
-                selectedItem = null;
-                selectedEditUrl = null;
+                selectedItem      = null;
+                selectedEditUrl   = null;
                 selectedDeleteUrl = null;
-                document.querySelectorAll('.cat-item.selected').forEach(el => el.classList.remove('selected'));
+                document.querySelectorAll('.cat-item.selected')
+                    .forEach(el => el.classList.remove('selected'));
                 actionsBar.classList.add('d-none');
             }
 
@@ -290,29 +349,33 @@
             btnDeleteCat.addEventListener('click', () => {
                 if (!selectedDeleteUrl) return;
 
-                Swal.fire({
-                    title: '¿Eliminar categoría?',
-                    text: 'Se eliminará la categoría seleccionada.',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    cancelButtonText: 'Cancelar',
-                    confirmButtonText: 'Sí, eliminar'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        deleteForm.action = selectedDeleteUrl;
-                        deleteForm.submit();
-                    }
-                });
+                if (window.Swal) {
+                    Swal.fire({
+                        title: '¿Eliminar categoría?',
+                        text: 'Se eliminará la categoría seleccionada.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#6C63FF',
+                        cancelButtonColor: '#6c757d',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonText: 'Sí, eliminar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            deleteForm.action = selectedDeleteUrl;
+                            deleteForm.submit();
+                        }
+                    });
+                } else {
+                    // Fallback silencioso si por alguna razón no está SweetAlert
+                    deleteForm.action = selectedDeleteUrl;
+                    deleteForm.submit();
+                }
             });
-
-
 
             // Si clicas fuera de la card, quitar selección (opcional)
             document.addEventListener('click', (e) => {
                 const panel = document.querySelector('.panel');
-                if (!panel.contains(e.target)) {
+                if (panel && !panel.contains(e.target)) {
                     clearSelection();
                 }
             });

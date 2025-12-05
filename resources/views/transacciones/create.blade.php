@@ -124,7 +124,7 @@
                            name="fecha"
                            id="fecha"
                            class="form-control js-date @error('fecha') is-invalid @enderror"
-                           value="{{ old('fecha', now()->toDateString()) }}"
+                           value="{{ old('fecha', now()->format('d/m/Y')) }}"
                            required
                            autocomplete="off">
                     @error('fecha')
@@ -165,10 +165,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             if (window.flatpickr) {
                 flatpickr('.js-date', {
-                    dateFormat: 'Y-m-d', // Formato que espera tu DB
+                    dateFormat: 'd/m/Y',                 // mismo formato que el controlador
                     locale: 'es',
-                    defaultDate: "{{ old('fecha', now()->toDateString()) }}",
-                    maxDate: "{{ now()->toDateString() }}",
+                    defaultDate: "{{ old('fecha', now()->format('d/m/Y')) }}",
+                    maxDate: "{{ now()->format('d/m/Y') }}",
                     allowInput: true
                 });
             }

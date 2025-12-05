@@ -3,11 +3,6 @@
 
 @section('content')
     <style>
-        :root{
-            --morado:#6C63FF; --amarillo:#FFD460; --beige:#FAF3DD; --gris:#2E2E2E;
-            --bg:var(--beige); --text:var(--gris); --card:#fff; --muted:#777;
-            --radius:1.2rem;
-        }
         .meta-wrap{
             max-width:720px;
             margin-inline:auto;
@@ -46,7 +41,12 @@
             background: var(--card);
             border-radius: 1rem;
             padding: 1rem 1.1rem 1.3rem;
+            border: 1px solid color-mix(in oklab, var(--text) 10%, transparent);
             box-shadow: 0 10px 28px rgba(0,0,0,.06);
+        }
+        html[data-theme="dark"] .panel{
+            border-color: var(--divider);
+            box-shadow: 0 10px 28px rgba(0,0,0,.4);
         }
         .form-label{
             font-weight:700;
@@ -63,6 +63,11 @@
             font-size:.85rem;
             color:#5b4a20;
             margin-bottom:.9rem;
+        }
+        html[data-theme="dark"] .hint-box{
+            background: color-mix(in oklab, var(--amarillo) 10%, transparent);
+            color: var(--amarillo);
+            border: 1px solid color-mix(in oklab, var(--amarillo) 20%, transparent);
         }
     </style>
 
@@ -131,11 +136,14 @@
                     <label class="form-label" for="objetivo_mask">Monto objetivo (MXN)</label>
 
                     {{-- Input visible con formato --}}
-                    <input type="text"
-                           id="objetivo_mask"
-                           class="form-control @error('objetivo') is-invalid @enderror"
-                           value="{{ old('objetivo') }}"
-                           placeholder="Ej. 10,000.00">
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="text"
+                               id="objetivo_mask"
+                               class="form-control @error('objetivo') is-invalid @enderror"
+                               value="{{ old('objetivo') }}"
+                               placeholder="Ej. 10,000.00">
+                    </div>
 
                     {{-- Input real que enviará el número --}}
                     <input type="hidden" name="objetivo" id="objetivo_real">
@@ -147,7 +155,6 @@
                         @enderror
                 </div>
 
-
                 {{-- Fecha límite (opcional) --}}
                 <div class="mb-3">
                     <label class="form-label" for="fecha_limite">Fecha límite (opcional)</label>
@@ -155,7 +162,7 @@
                            name="fecha_limite"
                            id="fecha_limite"
                            class="form-control js-date-limit @error('fecha_limite') is-invalid @enderror"
-                           value="{{ old('fecha_limite') }}"
+                           value="{{ old('fecha_limite', now()->format('d/m/Y')) }}"
                            autocomplete="off"
                            placeholder="Selecciona una fecha…">
                     @error('fecha_limite')
@@ -179,10 +186,7 @@
         </section>
     </div>
 
-    {{-- Flatpickr para fecha límite --}}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
+    {{-- Flatpickr para fecha límite (CSS/JS base ya están en app.blade; aquí sólo es por si acaso) --}}
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
@@ -192,7 +196,7 @@
             // --- 1. Flatpickr para la fecha límite ---
             if (window.flatpickr) {
                 flatpickr('.js-date-limit', {
-                    dateFormat: 'Y-m-d',
+                    dateFormat: 'd/m/Y',
                     minDate: 'today',
                     allowInput: true,
                     locale: 'es'
@@ -201,43 +205,27 @@
 
             // --- 2. Formateo de dinero más amigable (solo al perder el foco) ---
 
-            /**
-             * Función auxiliar para limpiar y normalizar el valor a un número.
-             * @param {string} value - Valor del input con formato de máscara.
-             * @returns {number | null}
-             */
             function cleanAndParse(value) {
                 if (!value) return null;
-                // 1. Reemplazar comas por puntos (si usaron coma como decimal)
-                // 2. Eliminar todo lo que no sea dígito o punto.
                 let clean = value.replace(/,/g, '').replace(/[^\d.]/g, '');
-
                 let num = parseFloat(clean);
                 return isNaN(num) ? null : num;
             }
 
-            /**
-             * Aplica formato local de dinero ($10,000.00) al input visible.
-             * @param {number} num - Número limpio.
-             * @returns {string}
-             */
             function formatNumber(num) {
                 if (num === null) return '';
-                // Usamos 'en-US' para el formato 10,000.00 (miles con coma, decimales con punto)
                 return num.toLocaleString('en-US', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
                 });
             }
 
-            // A. Inicialización: Aplicar formato al cargar si hay 'old' data
             const initialValue = cleanAndParse(maskInput.value);
             if (initialValue !== null) {
                 maskInput.value = formatNumber(initialValue);
-                realInput.value = initialValue; // Aseguramos que el input oculto tenga el valor limpio
+                realInput.value = initialValue;
             }
 
-            // B. Evento de Pérdida de Foco (Blur): Limpia y Formatea
             maskInput.addEventListener('blur', () => {
                 const num = cleanAndParse(maskInput.value);
 
@@ -250,30 +238,32 @@
                 }
             });
 
-            // C. Evento de Foco: Mostrar solo el número limpio para editar
             maskInput.addEventListener('focus', () => {
                 const num = cleanAndParse(maskInput.value);
                 if (num !== null) {
-                    // Muestra el número limpio (sin comas de miles)
                     maskInput.value = num.toFixed(2);
                 }
             });
 
-
-            // --- 3. SweetAlert2 para errores ---
+            // --- 3. SweetAlert2 para errores, respetando el tema actual ---
             @if ($errors->any())
             if (window.Swal) {
-                Swal.fire({
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+                const opts = {
                     icon: 'error',
                     title: 'Revisa tu meta',
                     text: 'Hay errores en el formulario. Corrige los campos marcados.',
-                    confirmButtonColor: '#6C63FF',
-                    theme: 'dark'
-                });
+                    confirmButtonColor: '#6C63FF'
+                };
+
+                if (isDark) {
+                    opts.theme = 'dark'; // Usar el tema oficial dark de SweetAlert2
+                }
+
+                Swal.fire(opts);
             }
             @endif
         });
     </script>
-
-
 @endsection

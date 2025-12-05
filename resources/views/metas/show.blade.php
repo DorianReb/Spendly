@@ -234,12 +234,12 @@
                         <div class="mb-3">
                             <label for="fecha_aporte" class="form-label">Fecha</label>
                             <input type="text"
-                                   name="fecha"
-                                   id="fecha_aporte"
-                                   class="form-control js-aporte-date"
-                                   value="{{ now()->toDateString() }}"
-                                   required
-                                   autocomplete="off">
+                                    name="fecha"
+                                    id="fecha_aporte"
+                                    class="form-control js-aporte-date"
+                                    value="{{ now()->format('d/m/Y') }}"
+                                    required
+                                    autocomplete="off">
                             <div class="form-text small">
                                 No puede ser una fecha futura.
                             </div>
@@ -270,9 +270,7 @@
             </div>
         </div>
     </div>
-    {{-- Flatpickr (si no lo tienes cargado globalmente) --}}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -302,10 +300,11 @@
             // Flatpickr para la fecha del aporte (sin fechas futuras)
             if (window.flatpickr) {
                 flatpickr('.js-aporte-date', {
-                    dateFormat: 'Y-m-d',
-                    maxDate: 'today',
-                    defaultDate: '{{ now()->toDateString() }}',
-                    locale: 'es'
+                    dateFormat: 'd/m/Y', // mismo formato que usa parseFecha
+                    maxDate: '{{ now()->format('d/m/Y') }}',
+                    defaultDate: '{{ now()->format('d/m/Y') }}',
+                    locale: 'es',
+                    allowInput: true
                 });
             }
         });

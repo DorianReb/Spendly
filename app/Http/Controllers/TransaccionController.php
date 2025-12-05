@@ -16,24 +16,33 @@ class TransaccionController extends Controller
     // 2ª pantalla: lista por categoría
     public function porCategoria(Categoria $categoria, Request $request)
     {
-        $usuarioId = auth()->user()->id; // o auth()->id()
-        $tipo = $request->query('tipo', 'gasto'); // gasto | ingreso
+        $usuarioId = auth()->id();
+        $tipo      = $request->query('tipo', 'gasto'); // gasto | ingreso
 
-        $transacciones = Transaccion::where('usuario_id', $usuarioId)
+        $desde = $request->query('desde');
+        $hasta = $request->query('hasta');
+
+        $query = Transaccion::where('usuario_id', $usuarioId)
             ->where('categoria_id', $categoria->id)
-            ->where('tipo', $tipo)
-            ->orderByDesc('fecha')
-            ->get();
+            ->where('tipo', $tipo);
 
-        $total = $transacciones->sum('importe');
+        if ($desde && $hasta) {
+            $query->whereBetween('fecha', [$desde, $hasta]);
+        }
+
+        $transacciones = $query->orderByDesc('fecha')->get();
+        $total         = $transacciones->sum('importe');
 
         return view('transacciones.por_categoria', [
             'categoria'      => $categoria,
             'transacciones'  => $transacciones,
             'total'          => $total,
             'tipo'           => $tipo,
+            'desde'          => $desde,
+            'hasta'          => $hasta,
         ]);
     }
+
 
     // 3ª pantalla: detalle
     public function show(Transaccion $transaccion)
@@ -56,6 +65,29 @@ class TransaccionController extends Controller
     {
         $usuarioId = auth()->id();
 
+        // --- Convertir fecha dd/mm/yy a Y-m-d ---
+        $fechaRaw = $request->input('fecha');
+
+        if ($fechaRaw) {
+            try {
+                // Acepta dd/mm/yy y dd/mm/yyyy
+                $fecha = \Carbon\Carbon::createFromFormat('d/m/Y', $fechaRaw);
+            } catch (\Exception $e) {
+                try {
+                    $fecha = \Carbon\Carbon::createFromFormat('d/m/y', $fechaRaw);
+                } catch (\Exception $e2) {
+                    return back()->withErrors(['fecha' => 'Formato de fecha inválido (usa dd/mm/aa).'])
+                        ->withInput();
+                }
+            }
+
+            // Sustituir fecha ya normalizada antes de validar
+            $request->merge([
+                'fecha' => $fecha->format('Y-m-d')
+            ]);
+        }
+
+        // VALIDACIÓN NORMAL
         $validated = $request->validate([
             'tipo'        => 'required|in:ingreso,gasto',
             'categoria_id'=> 'required|exists:categorias,id',
@@ -64,7 +96,7 @@ class TransaccionController extends Controller
             'nota'        => 'nullable|string|max:255',
         ]);
 
-        $validated['usuario_id'] = auth()->id();
+        $validated['usuario_id'] = $usuarioId;
 
         Transaccion::create($validated);
 
@@ -72,6 +104,7 @@ class TransaccionController extends Controller
             ->route('home')
             ->with('success', 'Transacción registrada.');
     }
+
 
     public function edit(Transaccion $transaccion)
     {
@@ -97,6 +130,27 @@ class TransaccionController extends Controller
     {
         $this->authorizeTransaccion($transaccion);
 
+        // --- Convertir fecha dd/mm/yy a Y-m-d ---
+        $fechaRaw = $request->input('fecha');
+
+        if ($fechaRaw) {
+            try {
+                $fecha = \Carbon\Carbon::createFromFormat('d/m/Y', $fechaRaw);
+            } catch (\Exception $e) {
+                try {
+                    $fecha = \Carbon\Carbon::createFromFormat('d/m/y', $fechaRaw);
+                } catch (\Exception $e2) {
+                    return back()->withErrors(['fecha' => 'Formato de fecha inválido (usa dd/mm/aa).'])
+                        ->withInput();
+                }
+            }
+
+            $request->merge([
+                'fecha' => $fecha->format('Y-m-d')
+            ]);
+        }
+
+        // VALIDACIÓN NORMAL
         $validated = $request->validate([
             'categoria_id'=> 'required|exists:categorias,id',
             'importe'     => 'required|numeric|min:0.01',
@@ -110,6 +164,7 @@ class TransaccionController extends Controller
             ->route('transacciones.show', $transaccion)
             ->with('success','Transacción actualizada.');
     }
+
 
     public function destroy(Transaccion $transaccion)
     {
